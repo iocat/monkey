@@ -17,6 +17,9 @@ func New(input string) *Lexer {
 	return l
 }
 
+// If possible, moves the current position ahead and reads
+// and sets character at the new position
+// Otherwise, sets character to 0
 func (l *Lexer) readChar() {
 	if l.position+1 >= len(l.input) {
 		l.ch = 0
@@ -24,15 +27,15 @@ func (l *Lexer) readChar() {
 		l.position++
 		l.ch = l.input[l.position]
 	}
-	// // Writing Interpreter book implementation.
-	// // I removed one field to simplify the implementation
-	// if l.readPosition >= len(l.input) {
-	// 	l.ch = 0
-	// } else {
-	// 	l.ch = l.input[l.readPosition]
-	// }
-	// l.position = l.readPosition
-	// l.readPosition++
+}
+
+// looks ahead one character, the read position is unchanged
+// If EOF, then returns 0
+func (l Lexer) peekChar() byte {
+	if l.position+1 >= len(l.input) {
+		return 0
+	}
+	return l.input[l.position+1]
 }
 
 func (l *Lexer) NextToken() token.Token {
@@ -40,7 +43,31 @@ func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
 	switch l.ch {
 	case '=':
-		tok = newToken(token.ASSIGN, l.ch)
+		if l.peekChar() == '=' {
+			ch := l.ch
+			l.readChar()
+			tok = token.Token{Type: token.EQ, Literal: string(ch) + string(l.ch)}
+		} else {
+			tok = newToken(token.ASSIGN, l.ch)
+		}
+	case '-':
+		tok = newToken(token.MINUS, l.ch)
+	case '!':
+		if l.peekChar() == '=' {
+			ch := l.ch
+			l.readChar()
+			tok = token.Token{Type: token.NOT_EQ, Literal: string(ch) + string(l.ch)}
+		} else {
+			tok = newToken(token.BANG, l.ch)
+		}
+	case '/':
+		tok = newToken(token.SLASH, l.ch)
+	case '*':
+		tok = newToken(token.ASTERISK, l.ch)
+	case '<':
+		tok = newToken(token.LT, l.ch)
+	case '>':
+		tok = newToken(token.GT, l.ch)
 	case ';':
 		tok = newToken(token.SEMICOLON, l.ch)
 	case '(':
