@@ -22,6 +22,7 @@ func New(input string) *Lexer {
 // Otherwise, sets character to 0
 func (l *Lexer) readChar() {
 	if l.position+1 >= len(l.input) {
+		l.position = len(l.input)
 		l.ch = 0
 	} else {
 		l.position++
